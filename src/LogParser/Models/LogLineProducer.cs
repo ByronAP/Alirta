@@ -1,4 +1,4 @@
-﻿namespace LogTailer.Models
+﻿namespace LogParser.Models
 {
     public enum LogLineProducer
     {

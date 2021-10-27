@@ -1,8 +1,8 @@
-﻿using LogTailer.Helpers;
+﻿using LogParser.Helpers;
 using Microsoft.Extensions.Logging;
 using System;
 
-namespace LogTailer.Models
+namespace LogParser.Models
 {
     public class LogItem
     {

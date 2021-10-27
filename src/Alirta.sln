@@ -1,11 +1,11 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31729.503
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alirta", "Alirta\Alirta.csproj", "{24860067-2B69-4AF1-8B94-0CB91DF54D29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogTailer", "LogTailer\LogTailer.csproj", "{6BD149AD-94F5-4C61-9832-8F09941CD714}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogParser", "LogParser\LogParser.csproj", "{B4EABBF1-7D11-4A63-8CF2-E3A78896B4F7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{24860067-2B69-4AF1-8B94-0CB91DF54D29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24860067-2B69-4AF1-8B94-0CB91DF54D29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{24860067-2B69-4AF1-8B94-0CB91DF54D29}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6BD149AD-94F5-4C61-9832-8F09941CD714}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6BD149AD-94F5-4C61-9832-8F09941CD714}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6BD149AD-94F5-4C61-9832-8F09941CD714}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6BD149AD-94F5-4C61-9832-8F09941CD714}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4EABBF1-7D11-4A63-8CF2-E3A78896B4F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4EABBF1-7D11-4A63-8CF2-E3A78896B4F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4EABBF1-7D11-4A63-8CF2-E3A78896B4F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4EABBF1-7D11-4A63-8CF2-E3A78896B4F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

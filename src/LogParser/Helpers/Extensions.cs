@@ -1,7 +1,7 @@
-﻿using LogTailer.Models;
+﻿using LogParser.Models;
 using Microsoft.Extensions.Logging;
 
-namespace LogTailer.Helpers
+namespace LogParser.Helpers
 {
     public static class Extensions
     {
