@@ -14,11 +14,13 @@ namespace LogParser.Helpers
         {
             if (string.IsNullOrWhiteSpace(value)) return LogLevel.None;
 
-            // some of these are not really used but we add the cases anyway
+            // some of these are not used but we add the cases anyway
             return value.Trim().ToLower() switch
             {
                 "warning" => LogLevel.Warning,
+                "warn" => LogLevel.Warning,
                 "error" => LogLevel.Error,
+                "information" => LogLevel.Information,
                 "info" => LogLevel.Information,
                 "debug" => LogLevel.Debug,
                 "trace" => LogLevel.Trace,
