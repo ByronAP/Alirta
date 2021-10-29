@@ -8,15 +8,29 @@ namespace Alirta.Models
         [Key]
         public string ChainName { get; set; }
 
+        public string InstanceDisplayName { get; set; }
+
+        public string Network { get; set; }
+
         public string AppVersion { get; set; }
 
-        public Status Status { get; set; } = Status.Unknown;
+        public Status Status { get; set; }
 
-        public ulong SyncedBlockHeight { get; set; } = 0ul;
+        public uint CurrencyPrecision { get; set; }
 
-        public ulong LastSubmittedTimestamp { get; set; } = 0ul;
+        public string CurrencyCode { get; set; }
 
-        public ulong LastLogTimestamp { get; set; } = 0ul;
+        public string MinorCurrencyCode { get; set; }
+
+        public ulong SyncedBlockHeight { get; set; }
+
+        public decimal TotalNetspace { get; set; }
+
+        public uint Difficulty { get; set; }
+
+        public ulong LastSubmittedTimestamp { get; set; }
+
+        public ulong LastLogTimestamp { get; set; }
 
         public uint LongestResponseTime { get; set; }
 
@@ -42,5 +56,6 @@ namespace Alirta.Models
 
         public virtual IEnumerable<PeerDbItem> Peers { get; set; }
 
+        public virtual IEnumerable<MonitorAddress> MonitorAddresses { get; set; }
     }
 }
