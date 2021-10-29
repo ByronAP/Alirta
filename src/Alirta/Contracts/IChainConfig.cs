@@ -4,9 +4,9 @@
     {
         string ChainName { get; set; }
 
-        string MajorCurrencyName { get; set; }
+        string CurrencyCode { get; set; }
 
-        string MinorCurrencyName { get; set; }
+        string MinorCurrencyCode { get; set; }
 
         uint CurrencyPrecision { get; set; }
 
