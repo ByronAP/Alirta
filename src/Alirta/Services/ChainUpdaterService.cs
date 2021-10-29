@@ -54,12 +54,14 @@ namespace Alirta.Services
 
         private async void DoWork(object state)
         {
-            var dbRecordExists = _appDbContext.ChainItems.Find(_chainConfig.ChainName) != null;
-            if (!dbRecordExists)
+            var dbRecord = _appDbContext.ChainItems.Find(_chainConfig.ChainName);
+            if (dbRecord == null)
             {
                 await InitDbRecord();
                 return;
             }
+
+            //TODO: update the record
 
             await Task.CompletedTask;
         }
