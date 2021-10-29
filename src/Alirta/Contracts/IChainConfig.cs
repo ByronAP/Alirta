@@ -12,8 +12,6 @@
 
         string Network { get; set; }
 
-        uint DaemonPort { get; set; }
-
         uint FarmerPort { get; set; }
 
         uint FullNodePort { get; set; }

@@ -21,9 +21,6 @@ namespace Alirta.Models
         [JsonPropertyName("network")]
         public string Network { get; set; } = "mainnet";
 
-        [JsonPropertyName("daemonPort")]
-        public uint DaemonPort { get; set; } = 55400;
-
         [JsonPropertyName("farmerPort")]
         public uint FarmerPort { get; set; } = 8559;
 
