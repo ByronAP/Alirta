@@ -21,14 +21,28 @@ namespace Alirta
 
         static async Task Main()
         {
-            Console.WriteLine($"{DateTimeOffset.UtcNow} INFO: App starting in {FileSystem.AppDirectoryPath}");
+            Console.WriteLine($"{DateTimeOffset.UtcNow} INFO: App starting in {Constants.AppRootPath}");
+            try
+            {
+                var cpuUsagePercent = SysInfo.Hal.GetProcThreadsCount();
+
+                Console.WriteLine($"Cpu count is {cpuUsagePercent:f2}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString() + Environment.NewLine + Environment.NewLine);
+            }
+
+            Console.ReadLine();
+
+            return;
 
             await EnsureAppConfigExistsAsync();
 
             _host = Host.CreateDefaultBuilder()
                    .ConfigureAppConfiguration(c =>
                    {
-                       c.SetBasePath(FileSystem.AppDirectoryPath);
+                       c.SetBasePath(Constants.AppRootPath);
                    })
                    .ConfigureServices(ConfigureServices)
                    .Build();
@@ -47,7 +61,7 @@ namespace Alirta
         {
             try
             {
-                var appConfigPath = Path.Combine(FileSystem.AppDirectoryPath, Constants.AppConfigFileName);
+                var appConfigPath = Path.Combine(Constants.AppRootPath, Constants.AppConfigFileName);
                 if (!File.Exists(appConfigPath))
                 {
                     Console.WriteLine($"{DateTimeOffset.UtcNow} INFO: Creating default config file (app.config). You need to edit this file with your own settings.");

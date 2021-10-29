@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Alirta.Models
 {
-    public class ChainDataItem
+    internal class ChainDbItem
     {
         [Key]
         public string ChainName { get; set; }
+
+        public string AppVersion { get; set; }
 
         public Status Status { get; set; } = Status.Unknown;
 
@@ -35,6 +38,8 @@ namespace Alirta.Models
         public uint PoolErrors { get; set; }
 
         public uint SkippedBlocks { get; set; }
+
+        public virtual IEnumerable<PeerDbItem> Peers { get; set; }
 
     }
 }

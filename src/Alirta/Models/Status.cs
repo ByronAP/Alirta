@@ -1,6 +1,6 @@
 ﻿namespace Alirta.Models
 {
-    public enum Status
+    internal enum Status
     {
         Unknown,
         Error,

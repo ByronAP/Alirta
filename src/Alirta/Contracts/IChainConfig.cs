@@ -2,6 +2,8 @@
 {
     public interface IChainConfig
     {
+        string ChainName { get; set; }
+
         string ExecutableName { get; set; }
 
         string ChainFolder { get; set; }

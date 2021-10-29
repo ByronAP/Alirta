@@ -1,12 +1,20 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31729.503
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31825.309
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Alirta", "Alirta\Alirta.csproj", "{24860067-2B69-4AF1-8B94-0CB91DF54D29}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogParser", "LogParser\LogParser.csproj", "{B4EABBF1-7D11-4A63-8CF2-E3A78896B4F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{9009074E-9C66-4D41-A22F-633BD98FB79D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestProject", "TestProject\TestProject.csproj", "{9009074E-9C66-4D41-A22F-633BD98FB79D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "chains", "chains", "{399F6C82-9E0B-4779-9AEA-F8B11440EB91}"
+	ProjectSection(SolutionItems) = preProject
+		..\chains\chia.config = ..\chains\chia.config
+		..\chains\sit.config = ..\chains\sit.config
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SysInfo", "SysInfo\SysInfo.csproj", "{EBAC821C-19A8-4D6E-9B12-96608ED2B473}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +34,10 @@ Global
 		{9009074E-9C66-4D41-A22F-633BD98FB79D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9009074E-9C66-4D41-A22F-633BD98FB79D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9009074E-9C66-4D41-A22F-633BD98FB79D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBAC821C-19A8-4D6E-9B12-96608ED2B473}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBAC821C-19A8-4D6E-9B12-96608ED2B473}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBAC821C-19A8-4D6E-9B12-96608ED2B473}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBAC821C-19A8-4D6E-9B12-96608ED2B473}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

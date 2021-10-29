@@ -1,33 +1,40 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Alirta.Helpers;
+using Alirta.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Alirta.DbContexts
 {
     internal class AppDbContext : DbContext
     {
-        private string AppRootFolder => Assembly.GetExecutingAssembly().Location;
+        public DbSet<ChainDbItem> ChainItems { get; set; }
 
-        private const string DataBackupFolderName = "backups";
-        private const string DataFolderName = "data";
-        private const string DataFileName = "data.dat";
-
-        private readonly ILogger<AppDbContext> _logger;
-
+#nullable enable
+        private readonly ILogger<AppDbContext>? _logger;
+#nullable restore
 
         public AppDbContext()
         {
+            if (!MigrateDbAsync().Result) Environment.Exit(2);
+
+            _logger = null;
+        }
+
+        public AppDbContext(ILogger<AppDbContext> logger)
+        {
+            _logger = logger;
+
             if (!MigrateDbAsync().Result) Environment.Exit(2);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
 
-            var sqlDatabaseFullPath = Path.Combine(AppRootFolder, DataFolderName, DataFileName);
+            var sqlDatabaseFullPath = Path.Combine(Constants.AppRootPath, Constants.DataFolderName, Constants.DataFileName);
 
             _ = optionsBuilder.UseSqlite($"Filename={sqlDatabaseFullPath}", options =>
             {
@@ -56,21 +63,10 @@ namespace Alirta.DbContexts
                 {
                     _logger?.LogError(ex, "Failed to apply migrations, db is incompatible.");
 
-                    _logger?.LogWarning(ex, "Attempting to retrieve existing accounts before db deletion.");
-                    //Account[] accounts = null;
-                    //try
-                    //{
-                    //    accounts = Accounts.ToArray();
-                    //}
-                    //catch (Exception exx)
-                    //{
-                    //    _logger?.LogError(exx, "Failed to retrieve accounts.");
-                    //}
-
-                    _logger?.LogWarning("Deleting database due to incompatability.");
-
                     // create a backup file
                     BackupDbFile();
+
+                    _logger?.LogWarning("Deleting database due to incompatability.");
 
                     var isDeleted = await Database.EnsureDeletedAsync();
                     if (isDeleted)
@@ -85,30 +81,6 @@ namespace Alirta.DbContexts
                         {
                             _logger?.LogError(exx, "Failed to create new db.");
                             return false;
-                        }
-
-                        _logger?.LogWarning("Attempting to migrate accounts to new db.");
-                        try
-                        {
-                            //if (accounts != null)
-                            //{
-                            //    foreach (var account in accounts)
-                            //    {
-                            //        try
-                            //        {
-                            //            _ = Accounts.Add(account);
-                            //            await SaveChangesAsync();
-                            //        }
-                            //        catch (Exception exx)
-                            //        {
-                            //            _logger?.LogError(exx, "Faild to migrate account {ID}: {DisplayName}", account.Id, account.DisplayName);
-                            //        }
-                            //    }
-                            //}
-                        }
-                        catch (Exception exx)
-                        {
-                            _logger?.LogError(exx, "Failed to migrate accounts.");
                         }
 
                         return true;
@@ -129,21 +101,34 @@ namespace Alirta.DbContexts
         {
             try
             {
+                _logger?.LogWarning("Database backup started.");
+
                 Database.CloseConnection();
 
-                var sourceSqlDatabaseFullPath = Path.Combine(AppRootFolder, DataFolderName, DataFileName);
-                var destinationSqlDatabaseDirectory = Path.Combine(AppRootFolder, DataFolderName, DataBackupFolderName);
+                var sourceSqlDatabaseFullPath = Path.Combine(Constants.AppRootPath, Constants.DataFolderName, Constants.DataFileName);
+                var destinationSqlDatabaseDirectory = Path.Combine(Constants.AppRootPath, Constants.DataFolderName, Constants.DataBackupFolderName);
                 var destinationSqlDatabaseFullPath = Path.Combine(destinationSqlDatabaseDirectory, $"db-backup-{DateTimeOffset.Now.ToUnixTimeSeconds()}.bak");
 
                 if (!Directory.Exists(destinationSqlDatabaseDirectory)) Directory.CreateDirectory(destinationSqlDatabaseDirectory);
 
                 File.Copy(sourceSqlDatabaseFullPath, destinationSqlDatabaseFullPath, true);
 
-                return File.Exists(destinationSqlDatabaseFullPath);
+                var fileExists = File.Exists(destinationSqlDatabaseFullPath);
+
+                if (fileExists)
+                {
+                    _logger?.LogWarning("Database backup completed.");
+                }
+                else
+                {
+                    _logger?.LogError("Database backup failed, backup not found.");
+                }
+
+                return fileExists;
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Failed to backup database.");
+                _logger?.LogError(ex, "Database backup failed from exception.");
                 return false;
             }
         }
