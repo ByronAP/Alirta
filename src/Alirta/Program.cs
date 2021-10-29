@@ -22,20 +22,8 @@ namespace Alirta
         static async Task Main()
         {
             Console.WriteLine($"{DateTimeOffset.UtcNow} INFO: App starting in {Constants.AppRootPath}");
-            try
-            {
-                var cpuUsagePercent = SysInfo.Hal.GetProcThreadsCount();
 
-                Console.WriteLine($"Cpu count is {cpuUsagePercent:f2}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString() + Environment.NewLine + Environment.NewLine);
-            }
-
-            Console.ReadLine();
-
-            return;
+            EnsureRequiredDirectoriesExist();
 
             await EnsureAppConfigExistsAsync();
 
@@ -57,18 +45,36 @@ namespace Alirta
             services.Configure<AppConfig>(context.Configuration);
         }
 
+        private static void EnsureRequiredDirectoriesExist()
+        {
+            if (!Directory.Exists(Constants.ChainConfigsPath))
+            {
+                Directory.CreateDirectory(Constants.ChainConfigsPath);
+
+                // add the default Chia config
+                var chainConfig = new ChainConfig();
+                var chainConfigJson = JsonSerializer.Serialize(chainConfig);
+
+                File.WriteAllText(Path.Combine(Constants.ChainConfigsPath, "chia.config"), chainConfigJson);
+            }
+
+            if (!Directory.Exists(Constants.DatabasePath))
+            {
+                Directory.CreateDirectory(Constants.DatabasePath);
+            }
+        }
+
         private static async Task EnsureAppConfigExistsAsync()
         {
             try
             {
-                var appConfigPath = Path.Combine(Constants.AppRootPath, Constants.AppConfigFileName);
-                if (!File.Exists(appConfigPath))
+                if (!File.Exists(Constants.AppConfigFilePath))
                 {
                     Console.WriteLine($"{DateTimeOffset.UtcNow} INFO: Creating default config file (app.config). You need to edit this file with your own settings.");
                     var newAppConfig = new AppConfig();
                     var appConfigJson = JsonSerializer.Serialize(newAppConfig);
 
-                    await File.WriteAllTextAsync(appConfigPath, appConfigJson);
+                    await File.WriteAllTextAsync(Constants.AppConfigFilePath, appConfigJson);
 
                     await Task.Delay(5000);
 
