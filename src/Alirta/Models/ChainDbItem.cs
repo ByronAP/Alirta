@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Alirta.Models
@@ -13,9 +12,9 @@ namespace Alirta.Models
 
         public Status Status { get; set; } = Status.Unknown;
 
-        public ulong LastSubmittedTimestamp { get; set; } = Convert.ToUInt64(DateTimeOffset.MinValue.ToUnixTimeMilliseconds());
+        public ulong LastSubmittedTimestamp { get; set; } = 0ul;
 
-        public ulong LastLogTimestamp { get; set; } = Convert.ToUInt64(DateTimeOffset.MinValue.ToUnixTimeMilliseconds());
+        public ulong LastLogTimestamp { get; set; } = 0ul;
 
         public uint LongestResponseTime { get; set; }
 
