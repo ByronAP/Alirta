@@ -4,6 +4,12 @@
     {
         string ChainName { get; set; }
 
+        string MajorCurrencyName { get; set; }
+
+        string MinorCurrencyName { get; set; }
+
+        uint DecimalLocation { get; set; }
+
         string ExecutableName { get; set; }
 
         string ChainFolder { get; set; }

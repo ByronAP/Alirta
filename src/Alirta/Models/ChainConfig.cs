@@ -9,6 +9,15 @@ namespace Alirta.Models
         [JsonPropertyName("chainName")]
         public string ChainName { get; set; } = "chia";
 
+        [JsonPropertyName("majorCurrencyName")]
+        public string MajorCurrencyName { get; set; } = "XCH";
+
+        [JsonPropertyName("minorCurrencyName")]
+        public string MinorCurrencyName { get; set; } = "mojo";
+
+        [JsonPropertyName("decimalLocation")]
+        public uint DecimalLocation { get; set; } = 12;
+
         [JsonPropertyName("executableName")]
         public string ExecutableName { get; set; } = "chia";
 
