@@ -41,11 +41,6 @@ namespace Alirta.DbContexts
             base.OnConfiguring(optionsBuilder);
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.HasChangeTrackingStrategy(ChangeTrackingStrategy.ChangingAndChangedNotifications);
-        }
-
         private async Task<bool> MigrateDbAsync()
         {
             if (Database.GetPendingMigrations().Any())
