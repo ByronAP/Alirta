@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 
 namespace Alirta.Helpers
@@ -12,7 +12,7 @@ namespace Alirta.Helpers
         internal const string DataFileName = "data.dat";
         internal const string ChainsFolderName = "chains";
 
-        internal static string AppRootPath => Assembly.GetExecutingAssembly().Location;
+        internal static string AppRootPath => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         internal static string UserProfilePath => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
     }
 }
