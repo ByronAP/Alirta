@@ -12,6 +12,8 @@ namespace Alirta.Models
 
         public Status Status { get; set; } = Status.Unknown;
 
+        public ulong SyncedBlockHeight { get; set; } = 0ul;
+
         public ulong LastSubmittedTimestamp { get; set; } = 0ul;
 
         public ulong LastLogTimestamp { get; set; } = 0ul;
