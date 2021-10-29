@@ -1,4 +1,5 @@
 ﻿using Alirta.Contracts;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -8,6 +9,9 @@ namespace Alirta.Models
     {
         [JsonPropertyName("chainName")]
         public string ChainName { get; set; } = "chia";
+
+        [JsonPropertyName("instanceDisplayName")]
+        public string InstanceDisplayName { get; set; }
 
         [JsonPropertyName("currencyCode")]
         public string CurrencyCode { get; set; } = "XCH";
@@ -41,6 +45,9 @@ namespace Alirta.Models
 
         [JsonPropertyName("walletPort")]
         public uint WalletPort { get; set; } = 9256;
+
+        [JsonPropertyName("monitorAddresses")]
+        public List<string> MonitorAddresses { get; set; } = new List<string>();
 
         internal static ChainConfig FromJson(string json)
         {

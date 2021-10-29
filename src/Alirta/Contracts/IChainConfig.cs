@@ -1,8 +1,12 @@
-﻿namespace Alirta.Contracts
+﻿using System.Collections.Generic;
+
+namespace Alirta.Contracts
 {
     public interface IChainConfig
     {
         string ChainName { get; set; }
+
+        string InstanceDisplayName { get; set; }
 
         string CurrencyCode { get; set; }
 
@@ -25,5 +29,7 @@
         uint HarvesterPort { get; set; }
 
         uint WalletPort { get; set; }
+
+        List<string> MonitorAddresses { get; set; }
     }
 }
