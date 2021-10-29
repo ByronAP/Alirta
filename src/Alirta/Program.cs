@@ -1,8 +1,11 @@
-﻿using Alirta.Helpers;
+﻿using Alirta.DbContexts;
+using Alirta.Helpers;
 using Alirta.Models;
+using Alirta.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Text.Json;
@@ -12,7 +15,7 @@ namespace Alirta
 {
     class Program
     {
-        internal T GetService<T>()
+        internal static T GetService<T>()
             where T : class
             => _host.Services.GetService(typeof(T)) as T;
 
@@ -43,6 +46,18 @@ namespace Alirta
         private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
         {
             services.Configure<AppConfig>(context.Configuration);
+            services.AddDbContext<AppDbContext>();
+            services.AddLogging();
+            foreach (var config in FileSystem.GetChainConfigs())
+            {
+                services.AddHostedService(sp =>
+                new ChainUpdaterService(
+                    config,
+                    sp.GetService<ILogger<ChainUpdaterService>>(),
+                    sp.GetService<AppDbContext>()
+                    )
+                );
+            }
         }
 
         private static void EnsureRequiredDirectoriesExist()
