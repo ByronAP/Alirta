@@ -7,18 +7,18 @@ namespace Alirta.Helpers
 {
     internal static class FileSystem
     {
-        internal static string GetCertsDirectoryRootPath(string chainFolder, string network)
+        internal static string GetChainCertsDirectoryRootPath(string chainFolder, string network)
         {
             return Path.Combine(Constants.UserProfilePath, chainFolder, network, "config", "ssl");
         }
 
-        internal static string GetCertDirectoryPath(string chainFolder, string network, NodeEntryPoint nodeEntryPoint)
+        internal static string GetChainCertDirectoryPath(string chainFolder, string network, NodeEntryPoint nodeEntryPoint)
         {
-            var certsPath = GetCertsDirectoryRootPath(chainFolder, network);
+            var certsPath = GetChainCertsDirectoryRootPath(chainFolder, network);
             return Path.Combine(certsPath, nodeEntryPoint.ToNodeAppName());
         }
 
-        internal static string GetLogsDirectoryPath(string chainFolder, string network)
+        internal static string GetChainLogsDirectoryPath(string chainFolder, string network)
         {
             return Path.Combine(Constants.UserProfilePath, chainFolder, network, "log");
         }

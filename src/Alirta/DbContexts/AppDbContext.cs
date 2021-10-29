@@ -33,10 +33,7 @@ namespace Alirta.DbContexts
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-
-            var sqlDatabaseFullPath = Path.Combine(Constants.AppRootPath, Constants.DataFolderName, Constants.DataFileName);
-
-            _ = optionsBuilder.UseSqlite($"Filename={sqlDatabaseFullPath}", options =>
+            _ = optionsBuilder.UseSqlite($"Filename={Constants.DatabaseFilePath}", options =>
             {
                 _ = options.CommandTimeout(15);
             });
@@ -105,13 +102,11 @@ namespace Alirta.DbContexts
 
                 Database.CloseConnection();
 
-                var sourceSqlDatabaseFullPath = Path.Combine(Constants.AppRootPath, Constants.DataFolderName, Constants.DataFileName);
-                var destinationSqlDatabaseDirectory = Path.Combine(Constants.AppRootPath, Constants.DataFolderName, Constants.DataBackupFolderName);
-                var destinationSqlDatabaseFullPath = Path.Combine(destinationSqlDatabaseDirectory, $"db-backup-{DateTimeOffset.Now.ToUnixTimeSeconds()}.bak");
+                var destinationSqlDatabaseFullPath = Path.Combine(Constants.DatabaseBackupPath, $"db-backup-{DateTimeOffset.Now.ToUnixTimeSeconds()}.bak");
 
-                if (!Directory.Exists(destinationSqlDatabaseDirectory)) Directory.CreateDirectory(destinationSqlDatabaseDirectory);
+                if (!Directory.Exists(Constants.DatabaseBackupPath)) Directory.CreateDirectory(Constants.DatabaseBackupPath);
 
-                File.Copy(sourceSqlDatabaseFullPath, destinationSqlDatabaseFullPath, true);
+                File.Copy(Constants.DatabaseFilePath, destinationSqlDatabaseFullPath, true);
 
                 var fileExists = File.Exists(destinationSqlDatabaseFullPath);
 
