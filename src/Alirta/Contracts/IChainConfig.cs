@@ -8,7 +8,7 @@
 
         string MinorCurrencyName { get; set; }
 
-        uint DecimalLocation { get; set; }
+        uint CurrencyPrecision { get; set; }
 
         string ExecutableName { get; set; }
 

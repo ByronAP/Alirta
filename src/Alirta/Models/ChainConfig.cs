@@ -15,8 +15,8 @@ namespace Alirta.Models
         [JsonPropertyName("minorCurrencyName")]
         public string MinorCurrencyName { get; set; } = "mojo";
 
-        [JsonPropertyName("decimalLocation")]
-        public uint DecimalLocation { get; set; } = 12;
+        [JsonPropertyName("currencyPrecision")]
+        public uint CurrencyPrecision { get; set; } = 12;
 
         [JsonPropertyName("executableName")]
         public string ExecutableName { get; set; } = "chia";
