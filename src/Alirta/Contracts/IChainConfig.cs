@@ -4,6 +4,8 @@ namespace Alirta.Contracts
 {
     public interface IChainConfig
     {
+        uint Id { get; set; }
+
         string ChainName { get; set; }
 
         string InstanceDisplayName { get; set; }
@@ -37,5 +39,9 @@ namespace Alirta.Contracts
         bool EnableWalletMonitoring { get; set; }
 
         List<string> MonitorAddresses { get; set; }
+
+        string ConfigFilePath { get; set; }
+
+        void Save();
     }
 }

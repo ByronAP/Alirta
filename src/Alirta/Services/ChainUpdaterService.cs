@@ -3,11 +3,13 @@ using Alirta.DbContexts;
 using Alirta.Helpers;
 using Alirta.Models;
 using ChiaApi;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,7 +20,7 @@ namespace Alirta.Services
         private readonly IChainConfig _chainConfig;
         private readonly ILogger<ChainUpdaterService> _logger;
         private readonly AppDbContext _appDbContext;
-        private Timer _timer;
+        private readonly Timer _timer;
         private readonly FullNodeApiClient _fullNodeApiClient;
         private readonly FarmerApiClient _farmerApiClient;
         private readonly HarvesterApiClient _harvesterApiClient;
@@ -43,6 +45,8 @@ namespace Alirta.Services
             var randStartDelay = new Random().Next(1, 30);
             _timer.Change(TimeSpan.FromSeconds(randStartDelay), TimeSpan.FromMinutes(1));
 
+            _logger.LogInformation("Monitoring starting for {ChainName} {DisplayName}.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
+
             return Task.CompletedTask;
         }
 
@@ -50,21 +54,30 @@ namespace Alirta.Services
         {
             _timer.Change(Timeout.Infinite, Timeout.Infinite);
 
+            _logger.LogInformation("Monitoring stopped for {ChainName} {DisplayName}.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
+
             return Task.CompletedTask;
         }
 
         private async void DoWork(object state)
         {
-            var dbRecord = await _appDbContext.ChainItems.FindAsync(_chainConfig.ChainName);
+            var dbRecord = await _appDbContext.ChainItems.FindAsync(_chainConfig.Id);
             if (dbRecord == null)
             {
                 dbRecord = await InitDbRecordAsync();
+
+                _chainConfig.Id = Convert.ToUInt32(dbRecord.Id);
+                _chainConfig.Save();
+
+                await UpdateDbRecordAsync(dbRecord);
+
+                return;
             }
 
-            await UpdateDbRecordAsync(dbRecord);
 
             if (DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(dbRecord.LastSubmittedTimestamp)).AddMinutes(Constants.ServerUpdateIntervalMinutes) < DateTimeOffset.UtcNow)
             {
+                await UpdateDbRecordAsync(dbRecord);
                 // Submit data to server
                 _logger.LogCritical("UPLOAD TO SERVER!");
             }
@@ -95,14 +108,16 @@ namespace Alirta.Services
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Failed to get/parse initial log item for {ChainName}.", _chainConfig.ChainName);
+                        _logger.LogError(ex, "Failed to get/parse initial log item for {ChainName} {DisplayName}.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
                     }
                 }
             }
             else
             {
-                _logger.LogWarning("Debug log file for {ChainName} doesn't exist.", _chainConfig.ChainName);
+                _logger.LogWarning("Debug log file for {ChainName} {DisplayName} doesn't exist.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
             }
+
+            _appDbContext.ChainItems.Add(newDbRecord);
 
             await _appDbContext.SaveChangesAsync();
 
@@ -111,6 +126,8 @@ namespace Alirta.Services
 
         private async Task UpdateDbRecordAsync(ChainDbItem dbRecord)
         {
+            await _appDbContext.ChainItems.LoadAsync();
+
             UpdateDbRecordFromChainConfig(dbRecord);
 
             // check the apis before we bother trying to work with them
@@ -118,6 +135,7 @@ namespace Alirta.Services
 
             var tasks = new List<Task>();
             tasks.Add(UpdateDbRecordFromBlockchainStateAsync(dbRecord));
+            tasks.Add(UpdateDbRecordFromLogsAsync(dbRecord));
 
             await Task.WhenAll(tasks);
 
@@ -144,17 +162,23 @@ namespace Alirta.Services
             var network = _chainConfig.Network.Trim();
             if (dbRecord.Network != network) dbRecord.Network = network;
 
-            dbRecord.MonitorAddresses = new List<MonitorAddress>();
-            if (_chainConfig.MonitorAddresses != null)
-            {
-                var monitoredAddresses = new List<MonitorAddress>();
-                foreach (var address in _chainConfig.MonitorAddresses)
-                {
-                    monitoredAddresses.Add(new MonitorAddress { Address = address });
-                }
+            if (dbRecord.MonitorAddresses == null) dbRecord.MonitorAddresses = new List<MonitorAddress>();
 
-                dbRecord.MonitorAddresses = monitoredAddresses;
+            foreach (var address in _chainConfig.MonitorAddresses)
+            {
+                if (dbRecord.MonitorAddresses.Any(x => x.Address == address)) continue;
+
+                dbRecord.MonitorAddresses.Add(new MonitorAddress { Address = address });
             }
+
+            foreach (var address in dbRecord.MonitorAddresses.ToArray())
+            {
+                if (_chainConfig.MonitorAddresses.Any(x => x == address.Address)) continue;
+
+                dbRecord.MonitorAddresses.Remove(address);
+            }
+
+            _appDbContext.SaveChanges();
         }
 
         private async Task UpdateDbRecordApiRespondingsAsync(ChainDbItem dbRecord)
@@ -165,7 +189,7 @@ namespace Alirta.Services
                 var fullNodeResult = await _fullNodeApiClient.GetNetworkInfoAsync();
                 if (fullNodeResult == null || !fullNodeResult.Success)
                 {
-                    _logger.LogWarning("Communication with fullnode for {ChainName} {ChainDisplayName} failed.", _chainConfig.ChainName, _chainConfig.InstanceDisplayName);
+                    _logger.LogWarning("Communication with fullnode for {ChainName} {DisplayName} failed.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
                     dbRecord.IsFullNodeApiResponsive = false;
                 }
                 else
@@ -175,7 +199,7 @@ namespace Alirta.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Communication with fullnode for {ChainName} {ChainDisplayName} failed.", _chainConfig.ChainName, _chainConfig.InstanceDisplayName);
+                _logger.LogError(ex, "Communication with fullnode for {ChainName} {DisplayName} failed.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
                 dbRecord.IsFullNodeApiResponsive = false;
             }
 
@@ -185,7 +209,7 @@ namespace Alirta.Services
                 var farmerResult = await _farmerApiClient.GetNetworkInfoAsync();
                 if (farmerResult == null || !farmerResult.Success)
                 {
-                    _logger.LogWarning("Communication with farmer for {ChainName} {ChainDisplayName} failed.", _chainConfig.ChainName, _chainConfig.InstanceDisplayName);
+                    _logger.LogWarning("Communication with farmer for {ChainName} {DisplayName} failed.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
                     dbRecord.IsFarmerApiResponsive = false;
                 }
                 else
@@ -195,7 +219,7 @@ namespace Alirta.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Communication with farmer for {ChainName} {ChainDisplayName} failed.", _chainConfig.ChainName, _chainConfig.InstanceDisplayName);
+                _logger.LogError(ex, "Communication with farmer for {ChainName} {DisplayName} failed.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
                 dbRecord.IsFarmerApiResponsive = false;
             }
 
@@ -205,7 +229,7 @@ namespace Alirta.Services
                 var harvesterResult = await _harvesterApiClient.GetNetworkInfoAsync();
                 if (harvesterResult == null || !harvesterResult.Success)
                 {
-                    _logger.LogWarning("Communication with harvester for {ChainName} {ChainDisplayName} failed.", _chainConfig.ChainName, _chainConfig.InstanceDisplayName);
+                    _logger.LogWarning("Communication with harvester for {ChainName} {DisplayName} failed.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
                     dbRecord.IsHarvesterApiResponsive = false;
                 }
                 else
@@ -215,7 +239,7 @@ namespace Alirta.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Communication with harvester for {ChainName} {ChainDisplayName} failed.", _chainConfig.ChainName, _chainConfig.InstanceDisplayName);
+                _logger.LogError(ex, "Communication with harvester for {ChainName} {DisplayName} failed.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
                 dbRecord.IsHarvesterApiResponsive = false;
             }
 
@@ -227,7 +251,7 @@ namespace Alirta.Services
                 {
                     if (_chainConfig.EnableWalletMonitoring)
                     {
-                        _logger.LogWarning("Communication with wallet for {ChainName} {ChainDisplayName} failed.", _chainConfig.ChainName, _chainConfig.InstanceDisplayName);
+                        _logger.LogWarning("Communication with wallet for {ChainName} {DisplayName} failed.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
                     }
 
                     dbRecord.IsWalletApiResponsive = false;
@@ -241,7 +265,7 @@ namespace Alirta.Services
             {
                 if (_chainConfig.EnableWalletMonitoring)
                 {
-                    _logger.LogError(ex, "Communication with wallet for {ChainName} {ChainDisplayName} failed.", _chainConfig.ChainName, _chainConfig.InstanceDisplayName);
+                    _logger.LogError(ex, "Communication with wallet for {ChainName} {DisplayName} failed.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
                 }
                 dbRecord.IsWalletApiResponsive = false;
             }
@@ -249,8 +273,14 @@ namespace Alirta.Services
 
         private async Task UpdateDbRecordFromBlockchainStateAsync(ChainDbItem dbRecord)
         {
+            if (!dbRecord.IsFullNodeApiResponsive)
+            {
+                _logger.LogWarning("{ChainName} {DisplayName} API marked as unresponsive, skipping update from fullnode API.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
+                return;
+            }
             try
             {
+                // FullNode status
                 var chainState = await _fullNodeApiClient.GetBlockchainStateAsync();
                 if (chainState != null && chainState.Success)
                 {
@@ -269,12 +299,56 @@ namespace Alirta.Services
                 }
                 else
                 {
-                    _logger.LogCritical("{ChainName} API failure, {Err}.", _chainConfig.ChainName, chainState.Error);
+                    _logger.LogCritical("{ChainName} {DisplayName} API failure, {Err}.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName, chainState.Error);
+                }
+
+                // FullNode Peers
+                if (dbRecord.Peers == null) dbRecord.Peers = new List<PeerDbItem>();
+
+                var chainPeers = await _fullNodeApiClient.GetConnectionsAsync();
+                if (chainPeers != null && chainPeers.Success)
+                {
+                    if (chainPeers.Connections?.Count > 0)
+                    {
+                        foreach (var peer in chainPeers.Connections)
+                        {
+                            if (dbRecord.Peers.Any(x => x.Host == peer.PeerHost.ToLower() && x.Port == peer.PeerPort)) continue;
+
+                            dbRecord.Peers.Add(new PeerDbItem { Host = peer.PeerHost, Port = peer.PeerPort });
+                        }
+
+                        foreach (var peer in dbRecord.Peers.ToArray())
+                        {
+                            if (chainPeers.Connections.Any(x => x.PeerHost.ToLower() == peer.Host && x.PeerPort == peer.Port)) continue;
+
+                            dbRecord.Peers.Remove(peer);
+                        }
+                    }
+                    else
+                    {
+                        dbRecord.Peers.Clear();
+                    }
+                }
+                else
+                {
+                    _logger.LogCritical("{ChainName} {DisplayName} API failure, {Err}.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName, chainPeers.Error);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogCritical(ex, "{ChainName} API failure.", _chainConfig.ChainName);
+                _logger.LogCritical(ex, "{ChainName} {DisplayName} API failure.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
+            }
+        }
+
+        private async Task UpdateDbRecordFromLogsAsync(ChainDbItem dbRecord)
+        {
+            try
+            {
+                await Task.CompletedTask;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "{ChainName} {DisplayName} log failure.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
             }
         }
     }

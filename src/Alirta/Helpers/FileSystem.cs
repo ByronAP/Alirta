@@ -35,7 +35,10 @@ namespace Alirta.Helpers
             foreach (var fileName in ListChainConfigs())
             {
                 var jsonString = File.ReadAllText(fileName);
-                yield return ChainConfig.FromJson(jsonString);
+                var chainItem = ChainConfig.FromJson(jsonString);
+                chainItem.ConfigFilePath = fileName;
+
+                yield return chainItem;
             }
         }
     }

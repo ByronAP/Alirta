@@ -24,8 +24,6 @@ namespace Alirta
 
         static async Task Main()
         {
-            Console.WriteLine($"{DateTimeOffset.UtcNow} INFO: App starting in {Constants.AppRootPath}");
-
             EnsureRequiredDirectoriesExist();
 
             await EnsureAppConfigExistsAsync();

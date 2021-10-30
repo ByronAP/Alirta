@@ -6,6 +6,8 @@ namespace Alirta.Models
     internal class ChainDbItem
     {
         [Key]
+        public uint Id { get; set; }
+
         public string ChainName { get; set; }
 
         public string InstanceDisplayName { get; set; }
@@ -62,8 +64,8 @@ namespace Alirta.Models
 
         public uint SkippedBlocks { get; set; }
 
-        public virtual IEnumerable<PeerDbItem> Peers { get; set; }
+        public virtual List<PeerDbItem> Peers { get; set; }
 
-        public virtual IEnumerable<MonitorAddress> MonitorAddresses { get; set; }
+        public virtual List<MonitorAddress> MonitorAddresses { get; set; }
     }
 }

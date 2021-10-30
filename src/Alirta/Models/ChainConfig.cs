@@ -1,5 +1,7 @@
 ﻿using Alirta.Contracts;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -7,6 +9,9 @@ namespace Alirta.Models
 {
     internal class ChainConfig : IChainConfig
     {
+        [JsonPropertyName("id")]
+        public uint Id { get; set; }
+
         [JsonPropertyName("chainName")]
         public string ChainName { get; set; } = "chia";
 
@@ -58,9 +63,19 @@ namespace Alirta.Models
         [JsonPropertyName("blocksPer10Min")]
         public uint BlocksPer10Min { get; set; } = 32;
 
+        [JsonIgnore]
+        public string ConfigFilePath { get; set; }
+
         internal static ChainConfig FromJson(string json)
         {
             return JsonSerializer.Deserialize<ChainConfig>(json);
+        }
+
+        public void Save()
+        {
+            if (string.IsNullOrWhiteSpace(ConfigFilePath)) throw new Exception("Can not update config file, config file path empty.");
+
+            File.WriteAllTextAsync(ConfigFilePath, JsonSerializer.Serialize(this));
         }
     }
 }
