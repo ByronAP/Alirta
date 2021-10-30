@@ -7,6 +7,8 @@ namespace Alirta.Models
         [Key]
         public string Address { get; set; }
 
+        public ulong Balance { get; set; }
+
         public ulong LastUpdated { get; set; }
     }
 }
