@@ -7,6 +7,7 @@ namespace Alirta.Helpers
     internal static class Constants
     {
         internal const string AppName = "Alirta";
+        internal const uint ServerUpdateIntervalMinutes = 5;
         internal const string AppConfigFileName = "app.config";
         internal const string DataBackupFolderName = "backups";
         internal const string DataFolderName = "data";
