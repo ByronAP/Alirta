@@ -48,6 +48,7 @@ namespace Alirta
             services.Configure<AppConfig>(context.Configuration);
             services.AddDbContext<AppDbContext>();
             services.AddLogging();
+            var chainCount = 0;
             foreach (var config in FileSystem.GetChainConfigs())
             {
                 services.AddHostedService(sp =>
@@ -57,6 +58,14 @@ namespace Alirta
                     sp.GetService<AppDbContext>()
                     )
                 );
+                chainCount++;
+            }
+
+            if (chainCount <= 0)
+            {
+                Console.WriteLine($"{DateTimeOffset.UtcNow} ERROR: No chain configs found (ex: chia.config). Please create your chain configs in the 'chains' folder before starting this service.");
+                Task.Delay(5000).Wait();
+                Environment.Exit(2);
             }
         }
 
@@ -70,7 +79,14 @@ namespace Alirta
                 var chainConfig = new ChainConfig();
                 var chainConfigJson = JsonSerializer.Serialize(chainConfig);
 
-                File.WriteAllText(Path.Combine(Constants.ChainConfigsPath, "chia.config"), chainConfigJson);
+                try
+                {
+                    File.WriteAllText(Path.Combine(Constants.ChainConfigsPath, "chia.config.template"), chainConfigJson);
+                }
+                catch
+                {
+                    // ignore
+                }
             }
 
             if (!Directory.Exists(Constants.DatabasePath))
@@ -85,7 +101,7 @@ namespace Alirta
             {
                 if (!File.Exists(Constants.AppConfigFilePath))
                 {
-                    Console.WriteLine($"{DateTimeOffset.UtcNow} INFO: Creating default config file (app.config). You need to edit this file with your own settings.");
+                    Console.WriteLine($"{DateTimeOffset.UtcNow} ERROR: Creating default config file (app.config). You need to edit this file with your own settings before starting this service.");
                     var newAppConfig = new AppConfig();
                     var appConfigJson = JsonSerializer.Serialize(newAppConfig);
 
@@ -98,7 +114,7 @@ namespace Alirta
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{DateTimeOffset.UtcNow} Error: Failed to create default app.config file. Please ensure file exists or permission to create file is set. Ex: {ex.Message}");
+                Console.WriteLine($"{DateTimeOffset.UtcNow} ERROR: Failed to create default 'app.config' file. Please ensure file exists or permission to create a file / write is set. Ex: {ex.Message}");
 
                 await Task.Delay(5000);
 
