@@ -10,6 +10,14 @@ namespace Alirta.Models
 
         public string InstanceDisplayName { get; set; }
 
+        public bool IsFullNodeApiResponsive { get; set; }
+
+        public bool IsFarmerApiResponsive { get; set; }
+
+        public bool IsHarvesterApiResponsive { get; set; }
+
+        public bool IsWalletApiResponsive { get; set; }
+
         public string Network { get; set; }
 
         public string AppVersion { get; set; }
