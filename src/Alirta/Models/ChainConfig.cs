@@ -1,4 +1,4 @@
-﻿using Alirta.Contracts;
+using Alirta.Contracts;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -48,6 +48,9 @@ namespace Alirta.Models
 
         [JsonPropertyName("monitorAddresses")]
         public List<string> MonitorAddresses { get; set; } = new List<string>();
+
+        [JsonPropertyName("enableWalletMonitoring")]
+        public bool EnableWalletMonitoring { get; set; } = true;
 
         internal static ChainConfig FromJson(string json)
         {

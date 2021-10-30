@@ -30,6 +30,8 @@ namespace Alirta.Contracts
 
         uint WalletPort { get; set; }
 
+        bool EnableWalletMonitoring { get; set; }
+
         List<string> MonitorAddresses { get; set; }
     }
 }
