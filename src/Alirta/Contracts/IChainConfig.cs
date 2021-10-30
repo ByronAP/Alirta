@@ -14,6 +14,10 @@ namespace Alirta.Contracts
 
         uint CurrencyPrecision { get; set; }
 
+        decimal BlockReward { get; set; }
+
+        uint BlocksPer10Min { get; set; }
+
         string ExecutableName { get; set; }
 
         string ChainFolder { get; set; }

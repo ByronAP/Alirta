@@ -52,6 +52,12 @@ namespace Alirta.Models
         [JsonPropertyName("enableWalletMonitoring")]
         public bool EnableWalletMonitoring { get; set; } = true;
 
+        [JsonPropertyName("blockReward")]
+        public decimal BlockReward { get; set; } = 2m;
+
+        [JsonPropertyName("blocksPer10Min")]
+        public uint BlocksPer10Min { get; set; } = 32;
+
         internal static ChainConfig FromJson(string json)
         {
             return JsonSerializer.Deserialize<ChainConfig>(json);
