@@ -28,6 +28,23 @@ namespace LogParser
             }
         }
 
+        public static IEnumerable<LogItem> ParseLines(string fileName, DateTimeOffset startTime)
+        {
+            var currentLine = uint.MinValue;
+
+            foreach (var line in File.ReadLines(fileName))
+            {
+                currentLine++;
+
+                if (string.IsNullOrWhiteSpace(line)) continue;
+
+                if (!line.StartsWith("20")) continue;
+
+                var item = LogItem.FromString(line, currentLine);
+                if (item.ProducedAt >= startTime) yield return item;
+            }
+        }
+
         public static uint CountLines(string fileName) => Convert.ToUInt32(File.ReadLines(fileName).Count());
     }
 }
