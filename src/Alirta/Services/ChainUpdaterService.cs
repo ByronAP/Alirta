@@ -355,7 +355,7 @@ namespace Alirta.Services
                 if (File.Exists(debugLogFilePath))
                 {
                     var logItems = LogParser.Parser.ParseLines(debugLogFilePath, DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(dbRecord.LastLogTimestamp)));
-                    if (logItems != null || !logItems.Any())
+                    if (logItems != null && logItems.Any())
                     {
                         var lastLogTimestamp = dbRecord.LastLogTimestamp;
                         var eligiblePlots = 0u;
@@ -378,10 +378,13 @@ namespace Alirta.Services
                                 }
                             }
 
-                            dbRecord.LastLogTimestamp = lastLogTimestamp;
-                            dbRecord.LongestResponseTime = Convert.ToUInt32(TimeSpan.FromSeconds(responseTimes.Max()).TotalMilliseconds);
-                            dbRecord.ShortestResponseTime = Convert.ToUInt32(TimeSpan.FromSeconds(responseTimes.Min()).TotalMilliseconds);
-                            dbRecord.AvgResponseTime = Convert.ToUInt32(TimeSpan.FromSeconds(responseTimes.Average()).TotalMilliseconds);
+                            if (lastLogTimestamp > dbRecord.LastLogTimestamp) dbRecord.LastLogTimestamp = lastLogTimestamp;
+                            if (responseTimes.Any())
+                            {
+                                dbRecord.LongestResponseTime = Convert.ToUInt32(TimeSpan.FromSeconds(responseTimes.Max()).TotalMilliseconds);
+                                dbRecord.ShortestResponseTime = Convert.ToUInt32(TimeSpan.FromSeconds(responseTimes.Min()).TotalMilliseconds);
+                                dbRecord.AvgResponseTime = Convert.ToUInt32(TimeSpan.FromSeconds(responseTimes.Average()).TotalMilliseconds);
+                            }
 
 
                         }
@@ -389,8 +392,6 @@ namespace Alirta.Services
                         {
                             _logger.LogError(ex, "Failed to get/parse log items for {ChainName} {DisplayName}.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
                         }
-
-                        dbRecord.LastLogTimestamp = lastLogTimestamp;
                     }
                 }
                 else
