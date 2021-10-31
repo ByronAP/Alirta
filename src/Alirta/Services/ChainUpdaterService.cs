@@ -1,4 +1,4 @@
-﻿using Alirta.Contracts;
+using Alirta.Contracts;
 using Alirta.DbContexts;
 using Alirta.Helpers;
 using Alirta.Models;
@@ -354,7 +354,7 @@ namespace Alirta.Services
                 var debugLogFilePath = Path.Combine(FileSystem.GetChainLogsDirectoryPath(_chainConfig.ChainFolder, _chainConfig.Network), "debug.log");
                 if (File.Exists(debugLogFilePath))
                 {
-                    var logItems = LogParser.Parser.ParseLines(debugLogFilePath);
+                    var logItems = LogParser.Parser.ParseLines(debugLogFilePath, DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(dbRecord.LastLogTimestamp)));
                     if (logItems != null)
                     {
                         var lastLogTimestamp = dbRecord.LastLogTimestamp;
