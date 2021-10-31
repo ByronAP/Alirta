@@ -3,6 +3,7 @@ using Alirta.DbContexts;
 using Alirta.Helpers;
 using Alirta.Models;
 using ChiaApi;
+using LogParser.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -314,7 +315,7 @@ namespace Alirta.Services
                         {
                             if (dbRecord.Peers.Any(x => x.Host == peer.PeerHost.ToLower() && x.Port == peer.PeerPort)) continue;
 
-                            dbRecord.Peers.Add(new PeerDbItem { Host = peer.PeerHost, Port = peer.PeerPort });
+                            dbRecord.Peers.Add(new PeerDbItem { Host = peer.PeerHost.ToLower(), Port = peer.PeerPort });
                         }
 
                         foreach (var peer in dbRecord.Peers.ToArray())
@@ -342,9 +343,56 @@ namespace Alirta.Services
 
         private async Task UpdateDbRecordFromLogsAsync(ChainDbItem dbRecord)
         {
+            await Task.CompletedTask;
+            //TODO
             try
             {
-                await Task.CompletedTask;
+                var debugLogFilePath = Path.Combine(FileSystem.GetChainLogsDirectoryPath(_chainConfig.ChainFolder, _chainConfig.Network), "debug.log");
+                if (File.Exists(debugLogFilePath))
+                {
+                    var logItems = LogParser.Parser.ParseLines(debugLogFilePath);
+                    if (logItems != null)
+                    {
+                        var lastLogTimestamp = dbRecord.LastLogTimestamp;
+                        var eligiblePlots = 0u;
+                        var proofs = 0u;
+                        var filters = 0u;
+                        var responseTimes = new List<double>();
+                        try
+                        {
+                            foreach (var logItem in logItems)
+                            {
+                                lastLogTimestamp = Convert.ToUInt64(logItem.ProducedAt.ToUnixTimeMilliseconds());
+
+                                if (logItem.LogLineType == LogParser.Models.LogLineType.EligiblePlots)
+                                {
+                                    var data = (HarvesterPlotsEligibleItem)logItem.Data;
+                                    eligiblePlots += data.Plots;
+                                    proofs += data.Proofs;
+                                    filters++;
+                                    responseTimes.Add(data.Time);
+                                }
+                            }
+
+                            dbRecord.LastLogTimestamp = lastLogTimestamp;
+                            dbRecord.LongestResponseTime = Convert.ToUInt32(TimeSpan.FromSeconds(responseTimes.Max()).TotalMilliseconds);
+                            dbRecord.ShortestResponseTime = Convert.ToUInt32(TimeSpan.FromSeconds(responseTimes.Min()).TotalMilliseconds);
+                            dbRecord.AvgResponseTime = Convert.ToUInt32(TimeSpan.FromSeconds(responseTimes.Average()).TotalMilliseconds);
+
+
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Failed to get/parse log items for {ChainName} {DisplayName}.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
+                        }
+
+                        dbRecord.LastLogTimestamp = lastLogTimestamp;
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("Debug log file for {ChainName} {DisplayName} doesn't exist.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
+                }
             }
             catch (Exception ex)
             {

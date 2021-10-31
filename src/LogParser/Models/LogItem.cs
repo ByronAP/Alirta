@@ -7,11 +7,13 @@ namespace LogParser.Models
     public class LogItem
     {
         public uint Index { get; set; }
+        public LogLineType LogLineType { get; set; }
         public DateTimeOffset ProducedAt { get; set; }
         public LogLineProducer Producer { get; set; }
         public string ProducerLocation { get; set; }
         public LogLevel LineLogLevel { get; set; }
         public string Message { get; set; }
+        public object Data { get; set; }
 
         public static LogItem FromString(string line, uint index = 0)
         {
@@ -44,6 +46,24 @@ namespace LogParser.Models
             // Message
             var messageString = line.Substring(logLevelSepLocation + 1).Trim();
 
+            var logLineType = LogLineType.Unknown;
+            var data = new Object();
+            switch (producerString.ToLogLineProducer())
+            {
+                //TODO
+                case LogLineProducer.Harvester:
+                    if (RegeX.IsHarvesterPlotsEligibleItem(messageString))
+                    {
+                        logLineType = LogLineType.EligiblePlots;
+                        data = messageString.ToHarvesterPlotsEligibleItem();
+                    }
+                    break;
+                default:
+                    logLineType = LogLineType.Unknown;
+                    break;
+
+            }
+
             // now that we have all the parts lets build the result object
             var result = new LogItem
             {
@@ -52,7 +72,9 @@ namespace LogParser.Models
                 ProducerLocation = locationString,
                 LineLogLevel = logLevelString.ToLogLevel(),
                 Message = messageString,
-                Index = index
+                Index = index,
+                LogLineType = logLineType,
+                Data = data
             };
 
             return result;
