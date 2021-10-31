@@ -355,7 +355,7 @@ namespace Alirta.Services
                 if (File.Exists(debugLogFilePath))
                 {
                     var logItems = LogParser.Parser.ParseLines(debugLogFilePath, DateTimeOffset.FromUnixTimeMilliseconds(Convert.ToInt64(dbRecord.LastLogTimestamp)));
-                    if (logItems != null)
+                    if (logItems != null || !logItems.Any())
                     {
                         var lastLogTimestamp = dbRecord.LastLogTimestamp;
                         var eligiblePlots = 0u;
