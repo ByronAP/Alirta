@@ -33,6 +33,10 @@ namespace Alirta.Services
             _logger = logger;
             _appDbContext = appDbContext;
 
+            _appDbContext.ChainItems.Load();
+            _appDbContext.MonitorAddresses.Load();
+            _appDbContext.PeerItems.Load();
+
             _fullNodeApiClient = NodeApis.GetFullNodeApiClient(_chainConfig);
             _farmerApiClient = NodeApis.GetFarmerApiClient(_chainConfig);
             _harvesterApiClient = NodeApis.GetHarvesterApiClient(_chainConfig);

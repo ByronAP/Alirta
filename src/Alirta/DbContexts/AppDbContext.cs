@@ -12,6 +12,8 @@ namespace Alirta.DbContexts
     internal class AppDbContext : DbContext
     {
         public DbSet<ChainDbItem> ChainItems { get; set; }
+        public DbSet<PeerDbItem> PeerItems { get; set; }
+        public DbSet<MonitorAddress> MonitorAddresses { get; set; }
 
 #nullable enable
         private readonly ILogger<AppDbContext>? _logger;
