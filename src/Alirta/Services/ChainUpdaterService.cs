@@ -368,7 +368,7 @@ namespace Alirta.Services
                             {
                                 lastLogTimestamp = Convert.ToUInt64(logItem.ProducedAt.ToUnixTimeMilliseconds());
 
-                                if (logItem.LogLineType == LogParser.Models.LogLineType.EligiblePlots)
+                                if (logItem.LogLineType == LogLineType.EligiblePlots)
                                 {
                                     var data = (HarvesterPlotsEligibleItem)logItem.Data;
                                     eligiblePlots += data.Plots;
