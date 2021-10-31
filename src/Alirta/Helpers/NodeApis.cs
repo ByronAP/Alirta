@@ -13,7 +13,7 @@ namespace Alirta.Helpers
             var certFilePath = Path.Combine(certsPath, "private_full_node.crt");
             var keyFilePath = Path.Combine(certsPath, "private_full_node.key");
 
-            var nodeApiConfig = new ChiaApiConfig(certFilePath, keyFilePath, "localhost", chainConfig.FullNodePort);
+            var nodeApiConfig = new ChiaApiConfig(certFilePath, keyFilePath, "localhost", chainConfig.FullNodePort, null, 2, null, false);
             return new FullNodeApiClient(nodeApiConfig);
         }
 
@@ -23,7 +23,7 @@ namespace Alirta.Helpers
             var certFilePath = Path.Combine(certsPath, "private_farmer.crt");
             var keyFilePath = Path.Combine(certsPath, "private_farmer.key");
 
-            var nodeApiConfig = new ChiaApiConfig(certFilePath, keyFilePath, "localhost", chainConfig.FullNodePort);
+            var nodeApiConfig = new ChiaApiConfig(certFilePath, keyFilePath, "localhost", chainConfig.FarmerPort, null, 2, null, false);
             return new FarmerApiClient(nodeApiConfig);
         }
 
@@ -33,7 +33,7 @@ namespace Alirta.Helpers
             var certFilePath = Path.Combine(certsPath, "private_harvester.crt");
             var keyFilePath = Path.Combine(certsPath, "private_harvester.key");
 
-            var nodeApiConfig = new ChiaApiConfig(certFilePath, keyFilePath, "localhost", chainConfig.FullNodePort);
+            var nodeApiConfig = new ChiaApiConfig(certFilePath, keyFilePath, "localhost", chainConfig.HarvesterPort, null, 2, null, false);
             return new HarvesterApiClient(nodeApiConfig);
         }
 
@@ -43,7 +43,7 @@ namespace Alirta.Helpers
             var certFilePath = Path.Combine(certsPath, "private_wallet.crt");
             var keyFilePath = Path.Combine(certsPath, "private_wallet.key");
 
-            var nodeApiConfig = new ChiaApiConfig(certFilePath, keyFilePath, "localhost", chainConfig.FullNodePort);
+            var nodeApiConfig = new ChiaApiConfig(certFilePath, keyFilePath, "localhost", chainConfig.WalletPort, null, 2, null, false);
             return new WalletApiClient(nodeApiConfig);
         }
     }
