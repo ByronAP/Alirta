@@ -48,6 +48,7 @@ namespace LogParser.Models
 
             var logLineType = LogLineType.Unknown;
             var data = new Object();
+
             switch (producerString.ToLogLineProducer())
             {
                 //TODO
@@ -56,6 +57,13 @@ namespace LogParser.Models
                     {
                         logLineType = LogLineType.EligiblePlots;
                         data = messageString.ToHarvesterPlotsEligibleItem();
+                    }
+                    break;
+                case LogLineProducer.FullNode:
+                    if (RegeX.IsFarmedUnfinishedBlockItem(messageString))
+                    {
+                        logLineType = LogLineType.FarmedUnfinishedBlock;
+                        data = messageString.ToFarmedUnfinishedBlockItem();
                     }
                     break;
                 default:

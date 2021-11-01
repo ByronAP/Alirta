@@ -4,6 +4,6 @@
     {
         Unknown,
         EligiblePlots,
-
+        FarmedUnfinishedBlock,
     }
 }

@@ -38,7 +38,7 @@ namespace TestProject
 
                 timingStopWatch.Start();
 
-                var result = LogParser.Parser.ParseLines(logFile, 10, 50);
+                var result = LogParser.Parser.ParseLines(logFile);
 
                 // force enumeration
                 var resultsArray = result.ToArray();

@@ -69,10 +69,38 @@ namespace LogParser.Helpers
             var plotsTotal = uint.Parse(totalStr);
             var time = double.Parse(timeStr);
 
-            // chains do not seem to report properly below 0.01S so  we just set a hard min
+            // chains do not seem to report below 0.01S so we just set a hard min
             if (time < 0.01d) time = 0.01d;
 
             return new HarvesterPlotsEligibleItem { Plots = plots, Proofs = proofs, PlotsTotal = plotsTotal, Time = time };
+        }
+
+        public static FarmedUnfinishedBlockItem ToFarmedUnfinishedBlockItem(this string value)
+        {
+            value = value.Trim();
+            var farmedSep = value.IndexOf(" ") + 1;
+            var unfinishedSep = value.IndexOf(" ", farmedSep) + 1;
+            var blockSep = value.IndexOf(", ", unfinishedSep);
+            var blockStr = value.Substring(unfinishedSep, blockSep - unfinishedSep);
+
+            var spSep = value.IndexOf(" ", blockSep) + 1;
+            var spEndSep = value.IndexOf(" ", spSep) + 1;
+            var spValSep = value.IndexOf(", ", spEndSep);
+            var spValStr = value.Substring(spEndSep, spValSep - spEndSep);
+
+            var validationSep = value.IndexOf(" ", spValSep + 1) + 1;
+            var timeSep = value.IndexOf(": ", validationSep) + 1;
+            var timeEndSep = value.IndexOf(", ", timeSep);
+            var timeStr = value.Substring(timeSep, timeEndSep - timeSep);
+
+            var costSep = value.IndexOf(": ", timeEndSep + 1) + 1;
+            var costStr = value.Substring(costSep).Trim();
+
+            var cost = ulong.Parse(costStr);
+            var sp = uint.Parse(spValStr);
+            var time = double.Parse(timeStr);
+
+            return new FarmedUnfinishedBlockItem { Block = blockStr, Cost = cost, SP = sp, ValidationTime = time };
         }
     }
 }
