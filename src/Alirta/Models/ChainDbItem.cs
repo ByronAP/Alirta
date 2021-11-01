@@ -42,11 +42,11 @@ namespace Alirta.Models
 
         public ulong LastLogTimestamp { get; set; }
 
-        public uint LongestResponseTime { get; set; }
+        public uint FilterResponseTimeMax { get; set; }
 
-        public uint AvgResponseTime { get; set; }
+        public uint FilterResponseTimeAvg { get; set; }
 
-        public uint ShortestResponseTime { get; set; }
+        public uint FilterResponseTimeMin { get; set; }
 
         public uint PlotsCount { get; set; }
 
