@@ -211,7 +211,7 @@ namespace Alirta.Services
             //FARMER
             try
             {
-                var farmerResult = await _farmerApiClient.GetNetworkInfoAsync();
+                var farmerResult = await _farmerApiClient.GetPoolStateAsync();
                 if (farmerResult == null || !farmerResult.Success)
                 {
                     _logger.LogWarning("Communication with farmer for {ChainName} {DisplayName} failed.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
@@ -231,7 +231,7 @@ namespace Alirta.Services
             //HARVESTER
             try
             {
-                var harvesterResult = await _harvesterApiClient.GetNetworkInfoAsync();
+                var harvesterResult = await _harvesterApiClient.GetPlotDirectoriesAsync();
                 if (harvesterResult == null || !harvesterResult.Success)
                 {
                     _logger.LogWarning("Communication with harvester for {ChainName} {DisplayName} failed.", _chainConfig.ChainName.ToUpper(), _chainConfig.InstanceDisplayName);
@@ -361,29 +361,39 @@ namespace Alirta.Services
                         var eligiblePlots = 0u;
                         var proofs = 0u;
                         var filters = 0u;
-                        var responseTimes = new List<double>();
+                        var farmedBlocks = 0u;
+
+                        var filterResponseTimes = new List<double>();
                         try
                         {
                             foreach (var logItem in logItems)
                             {
                                 lastLogTimestamp = Convert.ToUInt64(logItem.ProducedAt.ToUnixTimeMilliseconds());
 
-                                if (logItem.LogLineType == LogLineType.EligiblePlots)
+                                switch (logItem.LogLineType)
                                 {
-                                    var data = (HarvesterPlotsEligibleItem)logItem.Data;
-                                    eligiblePlots += data.Plots;
-                                    proofs += data.Proofs;
-                                    filters++;
-                                    responseTimes.Add(data.Time);
+                                    case LogLineType.Unknown:
+                                        break;
+                                    case LogLineType.EligiblePlots:
+                                        var hepData = (HarvesterPlotsEligibleItem)logItem.Data;
+                                        eligiblePlots += hepData.Plots;
+                                        proofs += hepData.Proofs;
+                                        filters++;
+                                        filterResponseTimes.Add(hepData.Time);
+                                        break;
+                                    case LogLineType.FarmedUnfinishedBlock:
+                                        var fubData = (FarmedUnfinishedBlockItem)logItem.Data;
+                                        farmedBlocks++;
+                                        break;
                                 }
                             }
 
                             if (lastLogTimestamp > dbRecord.LastLogTimestamp) dbRecord.LastLogTimestamp = lastLogTimestamp;
-                            if (responseTimes.Any())
+                            if (filterResponseTimes.Any())
                             {
-                                dbRecord.LongestResponseTime = Convert.ToUInt32(TimeSpan.FromSeconds(responseTimes.Max()).TotalMilliseconds);
-                                dbRecord.ShortestResponseTime = Convert.ToUInt32(TimeSpan.FromSeconds(responseTimes.Min()).TotalMilliseconds);
-                                dbRecord.AvgResponseTime = Convert.ToUInt32(TimeSpan.FromSeconds(responseTimes.Average()).TotalMilliseconds);
+                                dbRecord.FilterResponseTimeMax = Convert.ToUInt32(TimeSpan.FromSeconds(filterResponseTimes.Max()).TotalMilliseconds);
+                                dbRecord.FilterResponseTimeMin = Convert.ToUInt32(TimeSpan.FromSeconds(filterResponseTimes.Min()).TotalMilliseconds);
+                                dbRecord.FilterResponseTimeAvg = Convert.ToUInt32(TimeSpan.FromSeconds(filterResponseTimes.Average()).TotalMilliseconds);
                             }
 
 
