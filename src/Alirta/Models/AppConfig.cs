@@ -11,5 +11,9 @@ namespace Alirta.Models
         public bool LogToFile { get; set; } = false;
 
         public string ChainsDirectory { get; set; } = "blockchains";
+
+        public bool RemoteControlEnabled { get; set; } = false;
+
+        public string RemoteControlPassword { get; set; } = string.Empty;
     }
 }
